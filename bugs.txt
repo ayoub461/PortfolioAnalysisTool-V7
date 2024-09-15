@@ -1,0 +1,15 @@
+
+"""Bugs"""
+#check for files lengh before analyzing it, because there is files with more rows than others 
+(i think it is automaticly handled by dropping NaN)
+#Adjust the percentage in recap
+
+"""To Improve""
+#display more tickers to dwnload 
+
+- checck for 0 or negative values they are errors
+
+- dattfromatiing is essnetiel everything into numeric
+- verfie that :
+        Verify that High ≥ Open, Close, Low for each day.
+        Ensure Low ≤ Open, Close, High for each day.

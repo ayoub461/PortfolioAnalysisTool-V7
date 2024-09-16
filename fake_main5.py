@@ -21,10 +21,8 @@ def main():
     }
     
     #DST.displayTik() returns a list of tickers
-    tickers_dict, chosen_sectors_dict = DST.displayTik(sectors_dict)
-
-    print(f"tickers_dict \n : {tickers_dict}")
-    print(f"chosen_sectors_dict \n : {chosen_sectors_dict}")
+    tickers_dict, chosen_sectors_dict, build_choice = DST.displayTik(sectors_dict)
+    print(chosen_sectors_dict)
 
     # Get the number of elements in the list
     num_elements = len(tickers_dict["Symbol"])
@@ -37,7 +35,7 @@ def main():
 
     #Print portofolio Containt
     print("\n====>Your portofolio contains : \n")
-    print(df_tickers_dict)
+    psf.print_table(df_tickers_dict)
     
 
     #Variables
@@ -51,7 +49,7 @@ def main():
     print("\n\n====> Processing files...\n")
     for i in range(num_elements ):
         #ClCollecting Data
-        files,file_input,df_file_read, weights = collect_Data(i, tickers_dict, path_Data_base, files, weights, num_elements )
+        files,file_input,df_file_read, weights = collect_Data(i, tickers_dict, path_Data_base, files, weights, num_elements, sectors_dict, build_choice )
 
         # Cleaning Data
         closing_df0 = clean_Data(closing, file_input, i, df_file_read)
@@ -64,27 +62,27 @@ def main():
     psf.save_data(closing_df1, df_correlation, df_portfolio, path_saving_folder, df_sector_DL0)
 
 
-def collect_Data(index : int,
-                  tickers_dict:dict,
-                  path_Data_base: str,
-                    files : list,
-                    weights: list,
-                      num_elements: int, ) -> Tuple[list,str,DataFrame, list]:
+def collect_Data(index : int, tickers_dict:dict, path_Data_base: str,
+                    files : list, weights: list, num_elements: int,
+                    sectors_dict : dict, build_choice ) -> Tuple[list,str,DataFrame, list]:
 
     while True:
+        
         try:
             #Assinging tickers as input
             file_input = tickers_dict["Symbol"][index]
-            tickers_dict
-            print(f"file input : {file_input}\n{tickers_dict}")
 
             #Check if file exists or needs to be downloaded
             if psf.check_exsiting_file(file_input, path_Data_base) == True :
                 file_path = psf.get_file_path(path_Data_base, file_input, extension="csv")
             else :
-                DD.yfin(file_input)
-                file_path = psf.get_file_path(path_Data_base, file_input, extension="csv")
-            
+                status = DD.yfin(file_input)
+                
+                if status == True :
+                    file_path = psf.get_file_path(path_Data_base, file_input, extension="csv")
+                elif status == False :
+                    DST.displayTik(sectors_dict, mode='second', last_build_choice=build_choice )
+                    
             #Append files[] with the file input
             files.append(file_input)
 
@@ -139,9 +137,6 @@ def analyse_Data(closing_df0 : DataFrame,
 
     #calculate daily return of market
     portfolio_sector, df_sector_DL, df_sector_DL0 = ff.market_DR(chosen_sectors_dict)
-    print(df_sector_DL)
-    print(df_sector_DL0)
-    print(portfolio_sector)
 
     #calculate beta :    
     beta_results = ff.calculate_beta(df_sector_DL, closing_df02, chosen_sectors_dict)
@@ -159,7 +154,14 @@ def analyse_Data(closing_df0 : DataFrame,
     five_year_annualized = ff.annulized_return(totals_Cu_Rre,number_ofDays)
 
     #calculate Correlation between Stocks
-    df_correlation = ff.calculate_correlation(closing_df1)    
+    df_correlation = ff.calculate_correlation(closing_df1)
+    print(f"0 : {totals_Cu_Rre}")    
+    print(f"1 : {df_dict}")
+    print(f"2 : {weights}")
+    print(f"3 : {risk_dict}")
+    print(f"4 : {five_year_annualized}")
+    print(f"5 : {beta_results}")
+    print(f"6 : {medaf_return}")
 
     #calculate Portofolio return
     df_portfolio = ff.recap_portfolio(df_dict, weights, risk_dict, five_year_annualized, beta_results, medaf_return)

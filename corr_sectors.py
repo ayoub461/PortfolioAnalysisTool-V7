@@ -1,5 +1,4 @@
 import numpy as np
-from adapted_DD import yfin
 import Support_funct as psf
 import pandas as pd
 

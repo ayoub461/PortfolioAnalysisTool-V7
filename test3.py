@@ -8,11 +8,15 @@ from Support_funct import set_closing_prices
 
 def medaf(portfolio_sector : dict, beta_results : dict, chosen_sectors_dict : dict, rf= 0.04) -> dict:
     try :
-    
+        print(f"chosen_sectors_dict: {chosen_sectors_dict}")
+        print(f"chosen_sectors_dict: {portfolio_sector}")
         medaf_dict = {}
         beta = 0
         for key in chosen_sectors_dict.keys():
+            print(f"key {key}")
             for sector in portfolio_sector.keys() :
+                print(f"sector{sector}")
+                
                 if key == sector : 
                     rm = portfolio_sector[key]                    
                     
@@ -24,6 +28,9 @@ def medaf(portfolio_sector : dict, beta_results : dict, chosen_sectors_dict : di
                         market_risk_prime = risk_prime * beta
                         medaf = market_risk_prime + rf
                         medaf_dict[chosen_sectors_dict[key][i]] = medaf
+                
+                
+                
         return medaf_dict
     except Exception as e:
         raise e(f"General Error while calculating MEDAF : {e}") 
@@ -162,6 +169,7 @@ def annulized_return(totals_Cu_Rre:dict,
        name_apt = f"{name}_AR"
        if totals_Cu_Rre[name] <= -100:  # Check for more than 100% loss
             five_year_annualized[name_apt] = nan
+
        else:
         
         part1= (1+totals_Cu_Rre[name])
@@ -215,7 +223,6 @@ def calculate_cumulative_returns(closing_df: DataFrame) -> Tuple[DataFrame,dict]
             
             cumulative_returns = ((1 + closing_df[key] / 100).cumprod() - 1)*100
             cumulative_columns[cumulative_name] = cumulative_returns
-           
             name = adj_key
             totals[name] =  cumulative_columns[cumulative_name].iloc[-1]
             names.append(name)
@@ -266,7 +273,7 @@ def calculate_daily_returns(closing_df : DataFrame, new : bool = False)-> Tuple[
             else :
                 new_df[return_name] = closing_df[key].pct_change().shift(-1) * 100
                 portfolio[key] = new_df[return_name].mean()
-
+    new_df.drop(new_df.index[-1], inplace=True)
     new_df.dropna(inplace=True)
 
     return (portfolio, new_df)

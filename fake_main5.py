@@ -23,7 +23,8 @@ def main():
     #DST.displayTik() returns a list of tickers
     tickers_dict, chosen_sectors_dict, build_choice = DST.displayTik(sectors_dict)
     print(chosen_sectors_dict)
-
+    print(tickers_dict)
+    
     # Get the number of elements in the list
     num_elements = len(tickers_dict["Symbol"])
     
@@ -49,7 +50,7 @@ def main():
     print("\n\n====> Processing files...\n")
     for i in range(num_elements ):
         #ClCollecting Data
-        files,file_input,df_file_read, weights = collect_Data(i, tickers_dict, path_Data_base, files, weights, num_elements, sectors_dict, build_choice )
+        files,file_input,df_file_read, weights = collect_Data(i, tickers_dict, path_Data_base, files, weights, num_elements, sectors_dict, chosen_sectors_dict )
 
         # Cleaning Data
         closing_df0 = clean_Data(closing, file_input, i, df_file_read)
@@ -64,7 +65,7 @@ def main():
 
 def collect_Data(index : int, tickers_dict:dict, path_Data_base: str,
                     files : list, weights: list, num_elements: int,
-                    sectors_dict : dict, build_choice ) -> Tuple[list,str,DataFrame, list]:
+                    sectors_dict : dict, chosen_sectors_dict: dict) -> Tuple[list,str,DataFrame, list]:
 
     while True:
         
@@ -75,14 +76,42 @@ def collect_Data(index : int, tickers_dict:dict, path_Data_base: str,
             #Check if file exists or needs to be downloaded
             if psf.check_exsiting_file(file_input, path_Data_base) == True :
                 file_path = psf.get_file_path(path_Data_base, file_input, extension="csv")
+                
             else :
                 status = DD.yfin(file_input)
                 
                 if status == True :
-                    file_path = psf.get_file_path(path_Data_base, file_input, extension="csv")
-                elif status == False :
-                    DST.displayTik(sectors_dict, mode='second', last_build_choice=build_choice )
                     
+                    file_path = psf.get_file_path(path_Data_base, file_input, extension="csv")
+                
+                elif status == False :
+                    
+                    print(f"Failed to download data for {file_input}. Please choose another stock.")
+                    
+                    #get file sector name
+                    sectors_folder_path = "C:\\Users\\dl\\Desktop\\project_portofolio_analysis\\filterd_data\\sector"
+                    sector_name = DST.Value_to_FilePath(sectors_dict, chosen_sectors_dict, tickers_dict, file_input)
+
+                    #Remove the invalid ticker
+                    tickers_dict['Symbol'].pop(index)
+                    tickers_dict['Company_name'].pop(index)
+                    
+                    '''                                        
+                    print(sector_name)
+                    print(sectors_folder_path)
+                    '''                    
+                    
+                    #Read the file                                        
+                    sectors_file_path = psf.get_file_path(sectors_folder_path, sector_name)
+                    sector_read = psf.read_file(sectors_file_path)
+                    psf.print_table(sector_read.iloc[:,:2])
+                    
+                    new_ticker = input("Enter a valid stock ticker(not the index): ")
+                    tickers_dict["Symbol"][index] = new_ticker
+                    tickers_dict["Company_name"][index] = psf.get_company_name(new_ticker)  # You may need a function for this
+                    continue   
+                    
+
             #Append files[] with the file input
             files.append(file_input)
 

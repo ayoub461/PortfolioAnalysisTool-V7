@@ -1,20 +1,35 @@
-import pandas as pd
+sectors_dict = {
+    'basic_materials': 'XLB',  # Materials Select Sector SPDR Fund
+    'consumer_discretionary': 'XLY',  # Consumer Discretionary Select Sector SPDR Fund
+    'consumer_staples': 'XLP',  # Consumer Staples Select Sector SPDR Fund
+    'energy': 'XLE',  # Energy Select Sector SPDR Fund
+    'financials': 'XLF',  # Financial Select Sector SPDR Fund
+    'healthcare': 'XLV',  # Health Care Select Sector SPDR Fund
+    'industrials': 'XLI',  # Industrial Select Sector SPDR Fund
+    'real_estate': 'XLRE',  # Real Estate Select Sector SPDR Fund
+    'technology': 'XLK',  # Technology Select Sector SPDR Fund
+    'telecommunications': 'XLC',  # Communication Services Select Sector SPDR Fund
+    'utilities': 'XLU'  # Utilities Select Sector SPDR Fund
+    }
+    
+chosen_sectors_dict = {'XLY': ['AAL', 'AAN'], 'XLP': ['AAGRW']}
+tickers_dict = {'Symbol': ['AAL', 'AAGRW'], 'Company_name': ['American Airlines Group Inc. Common Stock', 'African Agriculture Holdings Inc. Warrant']}
 
-# Create a date range from January 1, 2020 to December 31, 2020
-dates = pd.date_range(start="2020-01-01", end="2020-12-31")
+file_input = 'AAGRW'
+index = 0
 
-# Create a DataFrame with this date range as the index and a simple column of values
-data = {
-    "Value": range(len(dates))  # Just an example column with incremental values
-}
+if file_input in tickers_dict['Symbol']:
+    index = tickers_dict['Symbol'].index(file_input)
+    print(f"Found symbol: {file_input} -> {tickers_dict['Company_name'][index]}")
 
-df = pd.DataFrame(data, index=dates)
-
-print(df)
-
-def days_number(df_cleaned: pd.DataFrame) -> int:
-    total_days = (df_cleaned.index[-1] - df_cleaned.index[0]).days
-    return total_days
-
-# Test the function with the example DataFrame
-print(f"Total days: {days_number(df)}")  # Expected: 365 (because 2020 is a leap year)
+    # Find the sector associated with this ticker in chosen_sectors_dict
+    for key1, value1 in chosen_sectors_dict.items():
+        if file_input in value1:
+            # Find the sector name in sectors_dict
+            for key2, value2 in sectors_dict.items():
+                if value2 == key1:
+                    print(f"The sector for {file_input} is: {key2}")
+                    break
+            
+            
+            

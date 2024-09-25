@@ -1,18 +1,14 @@
-import streamlit as st
-import yfinance as yf
-import matplotlib.pyplot as plt
+def replace_missing_value(chosen_sectors_dict: dict, old_value: str, new_value: str) -> dict:
 
-st.title("Stock Portfolio Analysis")
+    for sector, stocks in chosen_sectors_dict.items():
+        if old_value in stocks:
 
-ticker = st.text_input("Enter Stock Ticker (e.g. AAPL):")
-if ticker:
-    stock = yf.Ticker(ticker)
-    hist = stock.history(period="1y")
+            index = stocks.index(old_value)
+            stocks[index] = new_value
+            print(f"Replaced {old_value} with {new_value} in sector {sector}")
     
-    st.line_chart(hist['Close'])
-    
-    st.write("Last 5 days data:")
-    st.dataframe(hist.tail())
-    
-    st.write("Summary:")
-    st.write(stock.info)
+    return chosen_sectors_dict
+
+chosen_sectors_dict = {'XLY': ['zz', 'AAGRW'], 'XLP': ['AAL', 'aa']}
+updated_sectors_dict = replace_missing_value(chosen_sectors_dict, 'AAGRW', 'AAPL')
+print(updated_sectors_dict)

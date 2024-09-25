@@ -51,7 +51,13 @@ def main():
     for i in range(num_elements ):
         #ClCollecting Data
         files,file_input,df_file_read, weights = collect_Data(i, tickers_dict, path_Data_base, files, weights, num_elements, sectors_dict, chosen_sectors_dict )
-
+        
+        print(f"files : {files}")
+        print(f"file input :{file_input}")
+        print(f"file read {df_file_read}")
+        print(f"weights : {weights}")
+        print(f"chosen_sectors_dict {chosen_sectors_dict}")
+        print(f"tickers_dict {tickers_dict}")
         # Cleaning Data
         closing_df0 = clean_Data(closing, file_input, i, df_file_read)
 
@@ -70,8 +76,12 @@ def collect_Data(index : int, tickers_dict:dict, path_Data_base: str,
     while True:
         
         try:
+            print(f"ticker dict0 : {tickers_dict}")
+            print(f"index : {index}")
             #Assinging tickers as input
             file_input = tickers_dict["Symbol"][index]
+            print(f"ticker dict1 : {tickers_dict}")
+            print(f"index : {index}")
 
             #Check if file exists or needs to be downloaded
             if psf.check_exsiting_file(file_input, path_Data_base) == True :
@@ -95,21 +105,24 @@ def collect_Data(index : int, tickers_dict:dict, path_Data_base: str,
                     #Remove the invalid ticker
                     tickers_dict['Symbol'].pop(index)
                     tickers_dict['Company_name'].pop(index)
-                    
-                    '''                                        
-                    print(sector_name)
-                    print(sectors_folder_path)
-                    '''                    
+                    print(f"ticker dict2 : {tickers_dict}")                 
+                    print(f"index : {index}")
                     
                     #Read the file                                        
                     sectors_file_path = psf.get_file_path(sectors_folder_path, sector_name)
                     sector_read = psf.read_file(sectors_file_path)
                     psf.print_table(sector_read.iloc[:,:2])
                     
-                    new_ticker = input("Enter a valid stock ticker(not the index): ")
-                    tickers_dict["Symbol"][index] = new_ticker
-                    tickers_dict["Company_name"][index] = psf.get_company_name(new_ticker)  # You may need a function for this
-                    continue   
+                    user_stock_choice = psf.get_int_positive("\n\n|->which stock to add : ", list_range=list(range(1,len(sector_read)+1)))
+                    
+                    chosen_value_col1 = sector_read.iloc[user_stock_choice-1, 0]  
+                    chosen_value_col2 = sector_read.iloc[user_stock_choice-1, 1]  
+                    
+                    tickers_dict["Symbol"].append(chosen_value_col1)
+                    tickers_dict["Company_name"].append(chosen_value_col2)  
+                    print(f"ticker dict : {tickers_dict}")
+                    chosen_sectors_dict = psf.replace_missing_ticker(chosen_sectors_dict, file_input, chosen_value_col1)
+                    return collect_Data(index, tickers_dict, path_Data_base, files, weights, num_elements, sectors_dict, chosen_sectors_dict)
                     
 
             #Append files[] with the file input
@@ -121,6 +134,9 @@ def collect_Data(index : int, tickers_dict:dict, path_Data_base: str,
             weight = psf.get_valid_weight(file_input, weights, num_elements, index)
             weights.append(weight)
 
+            print(files)
+            print(file_input)
+            
             return (files,file_input,df_file_read, weights)
         
         #Cheking reading Errors

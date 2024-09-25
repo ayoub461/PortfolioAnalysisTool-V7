@@ -2,7 +2,7 @@ import corr_sectors as csect
 import Support_funct as psf
 import pandas as pd
 
-def displayTik(sector_dict :dict, mode='first', last_build_choice = None, ):
+def displayTik(sector_dict :dict):
 
     #Data folder.
     folder_path = "C:\\Users\\dl\\Desktop\\project_portofolio_analysis\\filterd_data\\sector"
@@ -21,84 +21,37 @@ def displayTik(sector_dict :dict, mode='first', last_build_choice = None, ):
     i = 0
     
     #checking Mode
-    mode = mode.strip().lower()
-    if mode.strip().lower() == 'first':
         
-        while True:
-            
-            #choosing between two methodes
-            build_choice = const_meth()
-            
-            while True : 
-                if build_choice == 1 :
-                    
-                    sector_dict, f_files = recommended_const(i, sector_dict, f_files )
-                    
-                elif build_choice == 2 :
-                    pass
-                    
-                user_sector_choice, file_dict = avaliable_sectors(f_files,sector_dict, file_dict )
+    while True:
+        
+        #choosing between two methodes
+        build_choice = const_meth()
+        
+        while True : 
+            if build_choice == 1 :
                 
-                while True :                
-                    
-                    choice_dict, chosen_sectors_dict = construct_port(file_dict, folder_path, chosen_stocks,  chosen_sectors_dict, choice_dict, user_sector_choice)
-                    
-                    
-                    choice = psf.try_again(f"\n1) Add more stocks from {f_files[user_sector_choice-1]} Sector;\n"
-                    f"2) Return to Sector Options;\n"
-                    f"3) Move to Analysis;\n",index=[1,2,3])
-                    if choice == 1:
-                        continue
-                    elif choice == 2 :
-                        break
-                    elif choice == 3 :
-                        return (choice_dict, chosen_sectors_dict, build_choice) 
-                    
-    #Second Mode option
-    elif mode == 'second':
-        sec_result_dict = {}
-        while True :                
+                sector_dict, f_files = recommended_const(i, sector_dict, f_files )
+                
+            elif build_choice == 2 :
+                pass
+                
+            user_sector_choice, file_dict = avaliable_sectors(f_files,sector_dict, file_dict )
             
-            while True :
-                user_stock_choice = psf.get_int_positive("\n\n|->which stock to add : ", list_range=list(sec_result_dict.keys()))
+            while True :                
                 
-                if sec_result_dict[user_stock_choice] in chosen_stocks :
-                        print("This Stock is Already chosen;")
-                        continue
-                else:
-                    chosen_stocks.append(sec_result_dict[user_stock_choice])
-                    
-                    sector_symbol = file_dict[user_sector_choice][1]
+                choice_dict, chosen_sectors_dict = construct_port(file_dict, folder_path, chosen_stocks,  chosen_sectors_dict, choice_dict, user_sector_choice)
                 
-                    # If the sector already exists in the dictionary, append to the list, otherwise create a new list
-                    if sector_symbol in chosen_sectors_dict:
-                        chosen_sectors_dict[sector_symbol].append(sec_result_dict[user_stock_choice][0])
-                    else:
-                        chosen_sectors_dict[sector_symbol] = [sec_result_dict[user_stock_choice][0]]
+                
+                choice = psf.try_again(f"\n1) Add more stocks from {f_files[user_sector_choice-1]} Sector;\n"
+                f"2) Return to Sector Options;\n"
+                f"3) Move to Analysis;\n",index=[1,2,3])
+                if choice == 1:
+                    continue
+                elif choice == 2 :
                     break
-                    
-            if user_stock_choice in sec_result_dict.keys():
-
-                choice_dict["Symbol"].append(sec_result_dict[user_stock_choice][0])
-                choice_dict["Company_name"].append(sec_result_dict[user_stock_choice][1])
-                
-                print(f"""\n-->Your Portfolio contains, Tickers :\n{choice_dict["Symbol"][-1]}.\nCompany Name : {choice_dict["Company_name"][-1]} """)
-
-                return (choice_dict, chosen_sectors_dict)
-
-            
-            choice = psf.try_again(f"\n1) Add more stocks from {f_files[user_sector_choice-1]} Sector;\n"
-            f"2) Return to Sector Options;\n"
-            f"3) Move to Analysis;\n",index=[1,2,3])
-            if choice == 1:
-                continue
-            elif choice == 2 :
-                break
-            elif choice == 3 :
-                
-                return (choice_dict, chosen_sectors_dict, build_choice) 
-    else : 
-        print("you missed uo.")    
+                elif choice == 3 :
+                    return (choice_dict, chosen_sectors_dict, build_choice) 
+                        
 
 
 def Value_to_FilePath(sectors_dict: dict, chosen_sectors_dict: dict, tickers_dict : dict, file_input):

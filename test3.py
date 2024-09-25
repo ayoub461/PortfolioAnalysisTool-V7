@@ -132,6 +132,7 @@ def calculate_beta(market_closing_df: DataFrame, stocks_closing_df: DataFrame,
         for stock in (chosen_sectors_dict[sector]):
 
             adj_stock_name = f"{stock}_DR"
+            print(adj_stock_name)
             if adj_stock_name not in stocks_list :
                 raise KeyError("Secotr Ajd name not found")
 

@@ -7,6 +7,18 @@ import itertools
 
 
 
+def replace_missing_ticker(chosen_sectors_dict: dict, old_value: str, new_value: str) -> dict:
+
+    for sector, stocks in chosen_sectors_dict.items():
+        if old_value in stocks:
+
+            index = stocks.index(old_value)
+            stocks[index] = new_value
+            print(f"Replaced {old_value} with {new_value} in sector {sector}")
+    
+    return chosen_sectors_dict
+
+
 def combinations(values :list , number_elements : int):
     values_list = values  # Replace with your actual set of 11 values
     p_combinations = list(itertools.combinations(values_list, number_elements))

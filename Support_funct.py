@@ -266,20 +266,25 @@ def read_file(file_path:str)-> DataFrame:
     df_file_read.index += 1
     return df_file_read
          
-def get_valid_weight(file, weights: list,
-                      elements_number:int,
-                        current_index:int)->float:
-    while True:
-        weight = get_percentage(f"Weight of {file}: ")
-        total_weight = sum(weights) + weight
-        if total_weight > 1:
-            print(f"The sum exceeds 100%. Available weight: {1 - sum(weights)}")
-            continue
-        elif current_index == elements_number - 1 and total_weight < 1:
-            print("Total weight must be 1.")
-            continue
-        else:
-            return weight
+def get_valid_weight(file, weights: list, elements_number: int, current_index: int) -> float:
+
+    if current_index == elements_number - 1:
+        remaining_weight = round(1 - sum(weights), 2)
+        print(f"Assigning remaining weight of {remaining_weight} to {file}.")
+        return remaining_weight
+
+    else :
+        remaining_stocks = elements_number - len(weights)
+        while True:
+            weight = get_percentage(f"Weight of {file}: ")
+            total_weight = round(sum(weights) + weight, 2)
+            
+            if total_weight >= 1:
+                print(f"The last :{remaining_stocks} stocks in portfolio, can not have 0.00 percente.")
+                print("Please Try again")
+                continue
+            else:
+                return weight
 
 def set_date(closing: dict,
               df_file_read: DataFrame,

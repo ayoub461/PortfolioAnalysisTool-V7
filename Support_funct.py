@@ -14,7 +14,6 @@ def replace_missing_ticker(chosen_sectors_dict: dict, old_value: str, new_value:
 
             index = stocks.index(old_value)
             stocks[index] = new_value
-            print(f"Replaced {old_value} with {new_value} in sector {sector}")
     
     return chosen_sectors_dict
 
@@ -270,7 +269,7 @@ def get_valid_weight(file, weights: list, elements_number: int, current_index: i
 
     if current_index == elements_number - 1:
         remaining_weight = round(1 - sum(weights), 2)
-        print(f"Assigning remaining weight of {remaining_weight} to {file}.")
+        print(f"\n\n===>Assigning remaining weight of {remaining_weight} to {file}.")
         return remaining_weight
 
     else :
@@ -285,6 +284,7 @@ def get_valid_weight(file, weights: list, elements_number: int, current_index: i
                 continue
             else:
                 return weight
+
 
 def set_date(closing: dict,
               df_file_read: DataFrame,

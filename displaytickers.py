@@ -150,7 +150,7 @@ def construct_port(file_dict : dict, folder_path, chosen_stocks : list,  chosen_
                 choice_dict["Symbol"].append(result_dict[user_stock_choice][0])
                 choice_dict["Company_name"].append(result_dict[user_stock_choice][1])
                 
-                print(f"""\n-->Your Portfolio contains, Tickers :\n{choice_dict["Symbol"][-1]}.\nCompany Name : {choice_dict["Company_name"][-1]} """)
+                print(f"""\n-->Your Portfolio contains:\n\nTickers :'{choice_dict["Symbol"][-1]}'.\nCompany Name : {choice_dict["Company_name"][-1]} """)
 
                 return (choice_dict, chosen_sectors_dict)
 

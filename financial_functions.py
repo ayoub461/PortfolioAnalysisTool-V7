@@ -8,14 +8,10 @@ from Support_funct import set_closing_prices
 
 def medaf(portfolio_sector : dict, beta_results : dict, chosen_sectors_dict : dict, rf= 0.04) -> dict:
     try :
-        print(f"chosen_sectors_dict: {chosen_sectors_dict}")
-        print(f"chosen_sectors_dict: {portfolio_sector}")
         medaf_dict = {}
         beta = 0
         for key in chosen_sectors_dict.keys():
-            print(f"key {key}")
             for sector in portfolio_sector.keys() :
-                print(f"sector{sector}")
                 
                 if key == sector : 
                     rm = portfolio_sector[key]                    
@@ -132,7 +128,6 @@ def calculate_beta(market_closing_df: DataFrame, stocks_closing_df: DataFrame,
         for stock in (chosen_sectors_dict[sector]):
 
             adj_stock_name = f"{stock}_DR"
-            print(adj_stock_name)
             if adj_stock_name not in stocks_list :
                 raise KeyError("Secotr Ajd name not found")
 
@@ -162,22 +157,24 @@ def calculate_beta(market_closing_df: DataFrame, stocks_closing_df: DataFrame,
 def annulized_return(totals_Cu_Rre:dict,
                      number_days:int)->dict:
     
-    y = (365/number_days)
+    y = round(365/number_days)
     five_year_annualized = {}
 
     for name in totals_Cu_Rre.keys():
-       
-       name_apt = f"{name}_AR"
-       if totals_Cu_Rre[name] <= -100:  # Check for more than 100% loss
+        totals_CRre = (totals_Cu_Rre[name] / 100)
+
+        name_apt = f"{name}_AR"
+        if totals_CRre <= -1:  # Check for more than 100% loss
             five_year_annualized[name_apt] = nan
 
-       else:
+        else:
         
-        part1= (1+totals_Cu_Rre[name])
-        part2 = pow(part1,y)
-        part3 = part2-1
-        
-        five_year_annualized[name_apt]= part3
+            part1 = 1 + totals_CRre
+            part2 = pow(part1,y)
+            part3 = part2-1
+            
+            
+        five_year_annualized[name_apt] = part3 * 100
     
     return five_year_annualized
 

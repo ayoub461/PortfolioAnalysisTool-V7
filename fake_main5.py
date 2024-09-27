@@ -22,8 +22,6 @@ def main():
     
     #DST.displayTik() returns a list of tickers
     tickers_dict, chosen_sectors_dict, build_choice = DST.displayTik(sectors_dict)
-    print(chosen_sectors_dict)
-    print(tickers_dict)
     
     # Get the number of elements in the list
     num_elements = len(tickers_dict["Symbol"])
@@ -51,13 +49,7 @@ def main():
     for i in range(num_elements ):
         #ClCollecting Data
         files,file_input,df_file_read, weights = collect_Data(i, tickers_dict, path_Data_base, files, weights, num_elements, sectors_dict, chosen_sectors_dict )
-        
-        print(f"files : {files}")
-        print(f"file input :{file_input}")
-        print(f"file read {df_file_read}")
-        print(f"weights : {weights}")
-        print(f"chosen_sectors_dict {chosen_sectors_dict}")
-        print(f"tickers_dict {tickers_dict}")
+
         # Cleaning Data
         closing_df0 = clean_Data(closing, file_input, i, df_file_read)
 
@@ -76,12 +68,8 @@ def collect_Data(index : int, tickers_dict:dict, path_Data_base: str,
     while True:
         
         try:
-            print(f"ticker dict0 : {tickers_dict}")
-            print(f"index : {index}")
             #Assinging tickers as input
             file_input = tickers_dict["Symbol"][index]
-            print(f"ticker dict1 : {tickers_dict}")
-            print(f"index : {index}")
 
             #Check if file exists or needs to be downloaded
             if psf.check_exsiting_file(file_input, path_Data_base) == True :
@@ -95,8 +83,6 @@ def collect_Data(index : int, tickers_dict:dict, path_Data_base: str,
                     file_path = psf.get_file_path(path_Data_base, file_input, extension="csv")
                 
                 elif status == False :
-                    
-                    print(f"Failed to download data for {file_input}. Please choose another stock.")
                     
                     #get file sector name
                     sectors_folder_path = "C:\\Users\\dl\\Desktop\\project_portofolio_analysis\\filterd_data\\sector"
@@ -113,6 +99,9 @@ def collect_Data(index : int, tickers_dict:dict, path_Data_base: str,
                     sector_read = psf.read_file(sectors_file_path)
                     psf.print_table(sector_read.iloc[:,:2])
                     
+                    print(f"Failed to download data for {file_input}")
+                    print("Please choose another stock.")
+                    
                     user_stock_choice = psf.get_int_positive("\n\n|->which stock to add : ", list_range=list(range(1,len(sector_read)+1)))
                     
                     chosen_value_col1 = sector_read.iloc[user_stock_choice-1, 0]  
@@ -120,7 +109,7 @@ def collect_Data(index : int, tickers_dict:dict, path_Data_base: str,
                     
                     tickers_dict["Symbol"].append(chosen_value_col1)
                     tickers_dict["Company_name"].append(chosen_value_col2)  
-                    print(f"ticker dict : {tickers_dict}")
+                    
                     chosen_sectors_dict = psf.replace_missing_ticker(chosen_sectors_dict, file_input, chosen_value_col1)
                     return collect_Data(index, tickers_dict, path_Data_base, files, weights, num_elements, sectors_dict, chosen_sectors_dict)
                     
@@ -133,9 +122,6 @@ def collect_Data(index : int, tickers_dict:dict, path_Data_base: str,
 
             weight = psf.get_valid_weight(file_input, weights, num_elements, index)
             weights.append(weight)
-
-            print(files)
-            print(file_input)
             
             return (files,file_input,df_file_read, weights)
         
@@ -200,13 +186,6 @@ def analyse_Data(closing_df0 : DataFrame,
 
     #calculate Correlation between Stocks
     df_correlation = ff.calculate_correlation(closing_df1)
-    print(f"0 : {totals_Cu_Rre}")    
-    print(f"1 : {df_dict}")
-    print(f"2 : {weights}")
-    print(f"3 : {risk_dict}")
-    print(f"4 : {five_year_annualized}")
-    print(f"5 : {beta_results}")
-    print(f"6 : {medaf_return}")
 
     #calculate Portofolio return
     df_portfolio = ff.recap_portfolio(df_dict, weights, risk_dict, five_year_annualized, beta_results, medaf_return)

@@ -32,7 +32,7 @@ APT
 To apply Modern Portfolio Theory (MPT) to a portfolio analysis project, follow these steps:
 
 ### **Step 1: Define the Investment Universe**
-- **Select Assets**: Choose a set of assets (e.g., stocks, bonds) that you want to include in the portfolio.
+- **    Select Assets**: Choose a set of assets (e.g., stocks, bonds) that you want to include in the portfolio.
 - **Data Collection**: Gather historical data for these assets, such as prices, returns, and risk-free rate.
 
 ### **Step 2: Calculate Asset Returns**

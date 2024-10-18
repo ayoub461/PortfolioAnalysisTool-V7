@@ -119,6 +119,7 @@ def collect_Data(index : int, tickers_dict:dict, path_Data_base: str,
 
             #read file input
             df_file_read = psf.read_file(file_path)
+            print(df_file_read.shape)
 
             weight = psf.get_valid_weight(file_input, weights, num_elements, index)
             weights.append(weight)

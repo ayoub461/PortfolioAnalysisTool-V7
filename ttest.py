@@ -1,4 +1,4 @@
-import Support_funct as psf
+import version5.support_functions as psf
 
 elements_number = 4
 weights = []  # Initial weights for the first two elements

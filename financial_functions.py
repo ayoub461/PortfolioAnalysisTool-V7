@@ -3,19 +3,19 @@ from numpy import cov, var, nan
 from pandas import DataFrame, to_datetime, concat, Series
 from typing import Union, Tuple
 from datetime import datetime, timedelta
-from Support_funct import set_closing_prices
+from support_functions import set_closing_prices
 
 
-def medaf(portfolio_sector : dict, beta_results : dict, chosen_sectors_dict : dict, rf= 0.04) -> dict:
-    try :
+
+def medaf(portfolio_sector: dict, beta_results: dict, chosen_sectors_dict: dict, rf=0.04) -> dict:
+    try:
         medaf_dict = {}
         beta = 0
         for key in chosen_sectors_dict.keys():
-            for sector in portfolio_sector.keys() :
+            for sector in portfolio_sector.keys():
                 
-                if key == sector : 
+                if key == sector: 
                     rm = portfolio_sector[key]                    
-                    
                     risk_prime = rm - rf
                     
                     for i in range(len(chosen_sectors_dict[key])):
@@ -25,70 +25,53 @@ def medaf(portfolio_sector : dict, beta_results : dict, chosen_sectors_dict : di
                         medaf = market_risk_prime + rf
                         medaf_dict[chosen_sectors_dict[key][i]] = medaf
                 
-                
-                
         return medaf_dict
     except Exception as e:
-        raise e(f"General Error while calculating MEDAF : {e}") 
-    
-                
+        raise Exception(f"General error while calculating MEDAF: {e}")
+
 
 def sharpe_Ratio():
     ...
 
 
-
 """Portfolio Optimization"""
 
-def efficient_Frontier ():
+def efficient_Frontier():
     ...
 
-def opt_portf() :
+def opt_portf():
     ...
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-def market_DR(chosen_sectors_dict : dict)-> Tuple [dict, DataFrame, DataFrame]:
-
+def market_DR(chosen_sectors_dict: dict) -> Tuple[dict, DataFrame, DataFrame]:
     df_sector_DL = DataFrame()
 
     chosen_sector = list(chosen_sectors_dict.keys())
 
     end_date = datetime.today()
-    start_date = end_date - timedelta(days=5*365)
+    start_date = end_date - timedelta(days=5 * 365)
     
     for benchmark_symbol in chosen_sector:
-        #download the index data
+        # Download the index data
         benchmark_data = download(benchmark_symbol, start=start_date.strftime('%Y-%m-%d'), end=end_date.strftime('%Y-%m-%d'))
 
-        #Only adj close coloumn
+        # Only adj close column
         df_sector_DL = set_closing_prices(df_sector_DL, benchmark_data, benchmark_symbol)
 
-    #clean the coloumn
-        df_sector_DL.dropna(inplace=True)
+    # Clean the column
+    df_sector_DL.dropna(inplace=True)
 
-    #calculate daily return for each coloumn 
+    # Calculate daily return for each column 
     portfolio_sector0, df_sector_DL0 = calculate_daily_returns(df_sector_DL)
-    portfolio_sector, df_sector_DL = calculate_daily_returns(df_sector_DL, new= True)
+    portfolio_sector, df_sector_DL = calculate_daily_returns(df_sector_DL, is_new=True)
 
     return (portfolio_sector, df_sector_DL, df_sector_DL0)
 
 
 def calculate_beta(market_closing_df: DataFrame, stocks_closing_df: DataFrame, 
-                   chosen_sectors_dict: dict)-> dict:
+                   chosen_sectors_dict: dict) -> dict:
     
-    #Clean stock daily return data frame
+    # Clean stock daily return data frame
     stocks_closing_df_copy = stocks_closing_df.copy()
 
     for stock_dropped in stocks_closing_df_copy.columns:
@@ -100,10 +83,10 @@ def calculate_beta(market_closing_df: DataFrame, stocks_closing_df: DataFrame,
     min_date_market = to_datetime(market_closing_df.index).date.min()
     min_date_stocks = to_datetime(stocks_closing_df_copy.index).date.min()
 
-    start_date = max(min_date_market,min_date_stocks)
+    start_date = max(min_date_market, min_date_stocks)
 
-    max_date_market = (to_datetime(market_closing_df.index).date).max()
-    max_date_stock = (to_datetime(stocks_closing_df_copy.index).date).max()
+    max_date_market = to_datetime(market_closing_df.index).date.max()
+    max_date_stock = to_datetime(stocks_closing_df_copy.index).date.max()
 
     end_date = min(max_date_market, max_date_stock)
 
@@ -122,17 +105,17 @@ def calculate_beta(market_closing_df: DataFrame, stocks_closing_df: DataFrame,
         
         adj_sector_name = f"{sector}_DR"
         
-        if adj_sector_name not in sector_list :
-            raise KeyError("Secotr Ajd name not found")
+        if adj_sector_name not in sector_list:
+            raise KeyError("Sector adjusted name not found")
 
-        for stock in (chosen_sectors_dict[sector]):
+        for stock in chosen_sectors_dict[sector]:
 
             adj_stock_name = f"{stock}_DR"
-            if adj_stock_name not in stocks_list :
-                raise KeyError("Secotr Ajd name not found")
+            if adj_stock_name not in stocks_list:
+                raise KeyError("Stock adjusted name not found")
 
             # Align DataFrames to ensure they have the same dates
-            combined = DataFrame.join(stocks_closing_df_filtered[adj_stock_name],market_closing_df_filtered[adj_sector_name])
+            combined = DataFrame.join(stocks_closing_df_filtered[adj_stock_name], market_closing_df_filtered[adj_sector_name])
             combined.dropna(inplace=True)
 
             # Step 5: Calculate correlation
@@ -154,10 +137,10 @@ def calculate_beta(market_closing_df: DataFrame, stocks_closing_df: DataFrame,
 
 """Portfolio Calculations"""
 
-def annulized_return(totals_Cu_Rre:dict,
-                     number_days:int)->dict:
+def annulized_return(totals_Cu_Rre: dict,
+                     number_days: int) -> dict:
     
-    y = round(365/number_days)
+    y = round(365 / number_days)
     five_year_annualized = {}
 
     for name in totals_Cu_Rre.keys():
@@ -166,27 +149,23 @@ def annulized_return(totals_Cu_Rre:dict,
         name_apt = f"{name}_AR"
         if totals_CRre <= -1:  # Check for more than 100% loss
             five_year_annualized[name_apt] = nan
-
         else:
-        
             part1 = 1 + totals_CRre
-            part2 = pow(part1,y)
-            part3 = part2-1
+            part2 = pow(part1, y)
+            part3 = part2 - 1
             
-            
-        five_year_annualized[name_apt] = part3 * 100
+            five_year_annualized[name_apt] = part3 * 100
     
     return five_year_annualized
 
 
-
 def recap_portfolio(df_dictnary: dict,
-                        weights: list,
-                            risk_dict: dict,
-                            five_year_annualized: dict,
-                              beta_results : dict,
-                              medaf_return : dict)->DataFrame:
-    #Set up dictionary
+                    weights: list,
+                    risk_dict: dict,
+                    five_year_annualized: dict,
+                    beta_results: dict,
+                    medaf_return: dict) -> DataFrame:
+    # Set up dictionary
     kies_list = list(df_dictnary.keys())
 
     recap = DataFrame()
@@ -195,34 +174,32 @@ def recap_portfolio(df_dictnary: dict,
     recap["Risk"] = [risk_dict[risk] for risk in risk_dict.keys()]
     recap["5-y annualized"] = [five_year_annualized[stock] for stock in five_year_annualized.keys()]
     recap["5-y Beta"] = [beta_results[beta] for beta in beta_results.keys()]
-    
-    
+
     if len(weights) == len(recap):
         recap["Weight"] = weights
     else:
-        raise ValueError("Length of the list does not match the number of rows in the DataFrame.")
+        raise ValueError("The length of the list does not match the number of rows in the DataFrame.")
     
-    recap.index=kies_list
+    recap.index = kies_list
     recapt = recap.T
 
     return recapt
 
 
-
-def calculate_cumulative_returns(closing_df: DataFrame) -> Tuple[DataFrame,dict]:
+def calculate_cumulative_returns(closing_df: DataFrame) -> Tuple[DataFrame, dict]:
     cumulative_columns = {}
-    #storing the total of cumulativre retunrs
+    # Storing the total of cumulative returns
     totals = {}
     names = []
     for key in closing_df.columns:
         if "_DR" in key:
-            adj_key = key.replace("_DR","")
+            adj_key = key.replace("_DR", "")
             cumulative_name = f"{adj_key}_CR"
             
-            cumulative_returns = ((1 + closing_df[key] / 100).cumprod() - 1)*100
+            cumulative_returns = ((1 + closing_df[key] / 100).cumprod() - 1) * 100
             cumulative_columns[cumulative_name] = cumulative_returns
             name = adj_key
-            totals[name] =  cumulative_columns[cumulative_name].iloc[-1]
+            totals[name] = cumulative_columns[cumulative_name].iloc[-1]
             names.append(name)
 
     cumulative_df = DataFrame(cumulative_columns)
@@ -231,14 +208,13 @@ def calculate_cumulative_returns(closing_df: DataFrame) -> Tuple[DataFrame,dict]
     result_df = closing_df.copy()
     for key in closing_df.columns:
         if "_DR" in key:
-            adj_key = key.replace("_DR","")
+            adj_key = key.replace("_DR", "")
             col_index = result_df.columns.get_loc(key) + 1
             cumulative_name = f"{adj_key}_CR"
             result_df.insert(col_index, cumulative_name, cumulative_df[cumulative_name])
     
     result_df.dropna(inplace=True)
     return (result_df, totals)
-    
 
 def risk_stock(df_daily_return: DataFrame) -> dict:
     risk_dict = {}
@@ -250,64 +226,54 @@ def risk_stock(df_daily_return: DataFrame) -> dict:
         risk_dict[name] = df_daily_return[cols].std().mean()
     return risk_dict
 
-    
-def calculate_daily_returns(closing_df : DataFrame, new : bool = False)-> Tuple[dict, DataFrame]:
-   
+def calculate_daily_returns(closing_df: DataFrame, is_new: bool = False) -> Tuple[dict, DataFrame]:
     portfolio = {}
     new_df = DataFrame()
     for key in closing_df.columns:
         if key == "Date":
             continue
         return_name = f"{key}_DR"
-        if new == False : 
+        if not is_new: 
             closing_df[return_name] = closing_df[key].pct_change().shift(-1) * 100
             portfolio[key] = closing_df[return_name].mean()
             closing_df.dropna(inplace=True)
             new_df = closing_df
 
-        elif new == True : 
-            if "_DR" in key :
-                pass
-            else :
+        elif is_new: 
+            if "_DR" in key:
+                continue
+            else:
                 new_df[return_name] = closing_df[key].pct_change().shift(-1) * 100
                 portfolio[key] = new_df[return_name].mean()
     new_df.drop(new_df.index[-1], inplace=True)
     new_df.dropna(inplace=True)
 
-    return (portfolio, new_df)
+    return portfolio, new_df
 
-
-def stock_corr(
-    stock_data: Union[DataFrame,list]
-) ->DataFrame:
+def stock_corr(stock_data: Union[DataFrame, list]) -> DataFrame:
     try:
-        if  isinstance(stock_data, DataFrame):
+        if isinstance(stock_data, DataFrame):
             combined_data = stock_data
         
-        elif isinstance(stock_data, list) and  all(isinstance(item, (Series, DataFrame)) for item in stock_data):    
+        elif isinstance(stock_data, list) and all(isinstance(item, (Series, DataFrame)) for item in stock_data):    
             combined_data = concat(stock_data, axis=1)
             
-        else :
+        else:
             raise TypeError("Invalid input type. Must be a DataFrame or list of Series/DataFrames.")
         
         correlation_matrix = combined_data.corr()
     except KeyError:
-        raise KeyError("code 1")
+        raise KeyError("Error in retrieving data for correlation calculation.")
     except Exception as e:
-        raise Exception(f"{e}code 2")            
+        raise Exception(f"{e} - Error in calculating correlation.")            
 
     return correlation_matrix
-
-
-
-def calculate_correlation(closing_df : DataFrame)-> DataFrame:
+def calculate_correlation(closing_df: DataFrame) -> DataFrame:
     return_columns = []
     
-    for name in closing_df.columns :
+    for name in closing_df.columns:
         if "_DR" in name:
             return_columns.append(closing_df[name])
     
     data_frame = stock_corr(return_columns)
     return data_frame
- 
-

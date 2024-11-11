@@ -1,5 +1,5 @@
 import exercice3.version4.adapted_DD as dd
-import Support_funct as psf
+import version5.support_functions as psf
 import pandas as pd
 
 # Function to download 5 years of data for a given ticker

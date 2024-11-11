@@ -1,10 +1,8 @@
 import numpy as np
-import Support_funct as psf
+import support_functions as psf
 import pandas as pd
 
-
-
-def optimal_sectors ():
+def optimal_sectors():
 
     sectors_dict = {
         'basic_materials': 'XLB',  # Materials Select Sector SPDR Fund
@@ -22,8 +20,7 @@ def optimal_sectors ():
 
     ticker_sector = ['XLB', 'XLY', 'XLP', 'XLE', 'XLF', 'XLV', 'XLI', 'XLRE', 'XLK', 'XLC', 'XLU']
 
-
-    folder_path  = "C:/Users/dl/Desktop/project_portofolio_analysis/filterd_data/sector/sector_data"
+    folder_path  = "C:/Users/dl/Desktop/project_portofolio_analysis/filtered_data/sector/sector_data"
 
     # Initialize a dictionary to store daily returns
     daily_returns_dict = {}
@@ -31,10 +28,10 @@ def optimal_sectors ():
     # Loop through each sector and file
     for ticker in sectors_dict.values():
         
-        #file name format
+        # File name format
         file_name = f"{ticker}.csv"
-        #read file
-        file_path = psf.get_file_path(folder_path,ticker)
+        # Read file
+        file_path = psf.get_file_path(folder_path, ticker)
         df = pd.read_csv(file_path, parse_dates=['Date'], index_col='Date')
         # Calculate daily returns
         df['Daily Return'] = df['Adj Close'].pct_change().shift(-1) * 100
@@ -46,26 +43,25 @@ def optimal_sectors ():
     # Calculate correlation matrix
     correlation_matrix = returns_df.corr()
 
-    #all possible combinations
+    # All possible combinations
     all_combinations = psf.combinations(ticker_sector, 5)
 
-
-    #store the least correlated combination
+    # Store the least correlated combination
     combo_dict = {"":[]}
     min_combo = 1
     min_combo_dict = {}
 
-    for combo in all_combinations :
-        #sumup the pair corr.
+    for combo in all_combinations:
+        # Sum up the pair correlations
         sumup = 0    
-        #pair corr
+        # Pair correlations
         pairs = psf.combinations(combo, 2)
         
         for pair in pairs:
             
-            #unpack the pair
+            # Unpack the pair
             sector1, sector2 = pair
-            #calulate abs value for each pair corr
+            # Calculate the absolute value for each pair correlation
             if sector1 in correlation_matrix.columns and sector2 in correlation_matrix.index:
                 value = correlation_matrix.loc[sector1, sector2]
                 abs_value = abs(value) 
@@ -74,32 +70,29 @@ def optimal_sectors ():
                 print(f"Pair {sector1}, {sector2} not found in correlation matrix")
         
         if len(pairs) > 0:        
-            #calculate and store average correlation
+            # Calculate and store the average correlation
             average_correlation = sumup / len(pairs)
             combo_dict[combo] = average_correlation
-            #check the min average correlation
-            if average_correlation < min_combo :
+            # Check the minimum average correlation
+            if average_correlation < min_combo:
                 min_combo = average_correlation
                 sectors_string = ', '.join(combo)
-                min_combo_dict = {sectors_string:average_correlation}
-            else :
+                min_combo_dict = {sectors_string: average_correlation}
+            else:
                 continue
-
         else:
             print(f"No valid pairs found for combo: {combo}")
 
-    #Into Data frames
+    # Convert to DataFrames
     df_combo = pd.DataFrame(list(combo_dict.items()), columns=['combination', 'average'])
-    df_min_combo = pd.DataFrame(list(min_combo_dict.items()), index=['Correlation'], columns=['Combination', 'min average absolute '])
+    df_min_combo = pd.DataFrame(list(min_combo_dict.items()), index=['Correlation'], columns=['Combination', 'min average absolute'])
 
-    #into excel files
+    # Save to Excel files
     save_to_file = 'sector correlations'
-    pathf = psf.get_file_path("C:/Users/dl/Desktop/project_portofolio_analysis",save_to_file,"xlsx")
+    pathf = psf.get_file_path("C:/Users/dl/Desktop/project_portofolio_analysis", save_to_file, "xlsx")
     with pd.ExcelWriter(pathf) as writer:
         correlation_matrix.to_excel(writer, sheet_name="Pairs Correlation Matrix")
         df_combo.to_excel(writer, sheet_name='Sector Combinations')
-        df_min_combo.to_excel(writer,sheet_name='Optimal Combination')
-
+        df_min_combo.to_excel(writer, sheet_name='Optimal Combination')
+        
     return df_min_combo
-    
-    

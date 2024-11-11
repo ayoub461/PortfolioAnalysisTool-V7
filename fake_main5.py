@@ -1,8 +1,8 @@
 from pandas import DataFrame, errors
 import financial_functions as ff
-import Support_funct as psf
-import Download_Data as DD
-import displaytickers as DST
+import version5.support_functions as psf
+import download_data as DD
+import version5.display_tickers as DST
 from typing import Tuple
 
 def main():

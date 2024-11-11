@@ -1,5 +1,5 @@
 import corr_sectors as csect
-import Support_funct as psf
+import version5.support_functions as psf
 import pandas as pd
 
 def displayTik(sector_dict :dict)->dict:

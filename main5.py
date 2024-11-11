@@ -1,217 +1,212 @@
 from pandas import DataFrame, errors
-import version5.financial_functions as ff
-import Support_funct as psf
-import Download_Data as DD
-import displaytickers as DST
+import financial_functions as ff
+import support_functions as psf
+import download_data as dd
+import display_tickers as dst
 from typing import Tuple
 
 def main():
     sectors_dict = {
-    'basic_materials': 'XLB',  # Materials Select Sector SPDR Fund
-    'consumer_discretionary': 'XLY',  # Consumer Discretionary Select Sector SPDR Fund
-    'consumer_staples': 'XLP',  # Consumer Staples Select Sector SPDR Fund
-    'energy': 'XLE',  # Energy Select Sector SPDR Fund
-    'financials': 'XLF',  # Financial Select Sector SPDR Fund
-    'healthcare': 'XLV',  # Health Care Select Sector SPDR Fund
-    'industrials': 'XLI',  # Industrial Select Sector SPDR Fund
-    'real_estate': 'XLRE',  # Real Estate Select Sector SPDR Fund
-    'technology': 'XLK',  # Technology Select Sector SPDR Fund
-    'telecommunications': 'XLC',  # Communication Services Select Sector SPDR Fund
-    'utilities': 'XLU'  # Utilities Select Sector SPDR Fund
+        'basic_materials': 'XLB',  # Materials Select Sector SPDR Fund
+        'consumer_discretionary': 'XLY',  # Consumer Discretionary Select Sector SPDR Fund
+        'consumer_staples': 'XLP',  # Consumer Staples Select Sector SPDR Fund
+        'energy': 'XLE',  # Energy Select Sector SPDR Fund
+        'financials': 'XLF',  # Financial Select Sector SPDR Fund
+        'healthcare': 'XLV',  # Health Care Select Sector SPDR Fund
+        'industrials': 'XLI',  # Industrial Select Sector SPDR Fund
+        'real_estate': 'XLRE',  # Real Estate Select Sector SPDR Fund
+        'technology': 'XLK',  # Technology Select Sector SPDR Fund
+        'telecommunications': 'XLC',  # Communication Services Select Sector SPDR Fund
+        'utilities': 'XLU'  # Utilities Select Sector SPDR Fund
     }
     
-    #DST.displayTik() returns a list of tickers
-    tickers_dict, chosen_sectors_dict, build_choice = DST.displayTik(sectors_dict)
+    # dst.display_tickers() returns a dictionary of selected tickers
+    tickers_dict, chosen_sectors_dict, build_choice = dst.display_tickers(sectors_dict)
     print(chosen_sectors_dict)
     print(tickers_dict)
     
     # Get the number of elements in the list
     num_elements = len(tickers_dict["Symbol"])
-    
 
-    #Create a Data frame for tickers in the portofolio
+    # Create a DataFrame for tickers in the portfolio
     df_tickers_dict = DataFrame(tickers_dict)
     df_tickers_dict.index += 1
 
-
-    #Print portofolio Containt
-    print("\n====>Your portofolio contains : \n")
+    # Print portfolio content
+    print("\n====> Your portfolio contains: \n")
     psf.print_table(df_tickers_dict)
     
-
-    #Variables
+    # Variables
     weights = []
     files = []   
     closing = {}
-    path_Data_base = 'C:/Users/dl/Desktop/project_portofolio_analysis/Data_base'
-    path_saving_folder = 'C:/Users/dl/Desktop/project_portofolio_analysis'
+    data_base_path = 'C:/Users/dl/Desktop/project_portofolio_analysis/Data_base'
 
+    saving_folder_path = 'C:/Users/dl/Desktop/project_portofolio_analysis'
 
     print("\n\n====> Processing files...\n")
-    for i in range(num_elements ):
-        #ClCollecting Data
-        files,file_input,df_file_read, weights = collect_Data(i, tickers_dict, path_Data_base, files, weights, num_elements, sectors_dict, chosen_sectors_dict )
+    for i in range(num_elements):
+        # Collecting Data
+        files, file_input, df_file_read, weights = collect_data(i, tickers_dict, data_base_path, files, weights, num_elements, sectors_dict, chosen_sectors_dict)
         
-        print(f"files : {files}")
-        print(f"file input :{file_input}")
-        print(f"file read {df_file_read}")
-        print(f"weights : {weights}")
-        print(f"chosen_sectors_dict {chosen_sectors_dict}")
-        print(f"tickers_dict {tickers_dict}")
+        print(f"Files: {files}")
+        print(f"File Input: {file_input}")
+        print(f"File Read: {df_file_read}")
+        print(f"Weights: {weights}")
+        print(f"Chosen Sectors Dict: {chosen_sectors_dict}")
+        print(f"Tickers Dict: {tickers_dict}")
+        
         # Cleaning Data
-        closing_df0 = clean_Data(closing, file_input, i, df_file_read)
+        closing_df0 = clean_data(closing, file_input, i, df_file_read)
 
-    #Analyzing Data
-    closing_df1, df_correlation, df_portfolio, df_sector_DL0 = analyse_Data(closing_df0, weights, chosen_sectors_dict)
+    # Analyzing Data
+    closing_df1, df_correlation, df_portfolio, df_sector_data = analyze_data(closing_df0, weights, chosen_sectors_dict)
     
+    # Saving Data
+    psf.save_data(closing_df1, df_correlation, df_portfolio, saving_folder_path, df_sector_data)
 
-    #saving Data
-    psf.save_data(closing_df1, df_correlation, df_portfolio, path_saving_folder, df_sector_DL0)
 
-
-def collect_Data(index : int, tickers_dict:dict, path_Data_base: str,
-                    files : list, weights: list, num_elements: int,
-                    sectors_dict : dict, chosen_sectors_dict: dict) -> Tuple[list,str,DataFrame, list]:
+def collect_data(index: int, tickers_dict: dict, data_base_path: str,
+                 files: list, weights: list, num_elements: int,
+                 sectors_dict: dict, chosen_sectors_dict: dict) -> Tuple[list, str, DataFrame, list]:
 
     while True:
-        
         try:
-            print(f"ticker dict0 : {tickers_dict}")
-            print(f"index : {index}")
-            #Assinging tickers as input
+            print(f"Ticker dictionary (initial): {tickers_dict}")
+            print(f"Index: {index}")
+            
+            # Assign ticker as input
             file_input = tickers_dict["Symbol"][index]
-            print(f"ticker dict1 : {tickers_dict}")
-            print(f"index : {index}")
+            print(f"Ticker dictionary (after assigning file_input): {tickers_dict}")
+            print(f"Index: {index}")
 
-            #Check if file exists or needs to be downloaded
-            if psf.check_exsiting_file(file_input, path_Data_base) == True :
-                file_path = psf.get_file_path(path_Data_base, file_input, extension="csv")
+            # Check if file exists or needs to be downloaded
+            if psf.check_existing_file(file_input, data_base_path):
+                file_path = psf.get_file_path(data_base_path, file_input, extension="csv")
+            else:
+                status = dd.yfin(file_input)
                 
-            else :
-                status = DD.yfin(file_input)
-                
-                if status == True :
-                    
-                    file_path = psf.get_file_path(path_Data_base, file_input, extension="csv")
-                
-                elif status == False :
-                    
+                if status:
+                    file_path = psf.get_file_path(data_base_path, file_input, extension="csv")
+                else:
                     print(f"Failed to download data for {file_input}. Please choose another stock.")
                     
-                    #get file sector name
-                    sectors_folder_path = "C:\\Users\\dl\\Desktop\\project_portofolio_analysis\\filterd_data\\sector"
-                    sector_name = DST.Value_to_FilePath(sectors_dict, chosen_sectors_dict, tickers_dict, file_input)
+                    # Get sector folder path
+                    sectors_folder_path = "C:\\Users\\dl\\Desktop\\project_portofolio_analysis\\filtered_data\\sector" 
+                    sector_name = dst.value_to_filepath(sectors_dict, chosen_sectors_dict, tickers_dict, file_input)
 
-                    #Remove the invalid ticker
+                    # Remove the invalid ticker
                     tickers_dict['Symbol'].pop(index)
                     tickers_dict['Company_name'].pop(index)
-                    print(f"ticker dict2 : {tickers_dict}")                 
-                    print(f"index : {index}")
+                    print(f"Ticker dictionary (after removing invalid ticker): {tickers_dict}")                 
+                    print(f"Index: {index}")
                     
-                    #Read the file                                        
+                    # Read the file                                      
                     sectors_file_path = psf.get_file_path(sectors_folder_path, sector_name)
-                    sector_read = psf.read_file(sectors_file_path)
-                    psf.print_table(sector_read.iloc[:,:2])
+                    sector_data = psf.read_file(sectors_file_path)
+                    psf.print_table(sector_data.iloc[:, :2])
                     
-                    user_stock_choice = psf.get_int_positive("\n\n|->which stock to add : ", list_range=list(range(1,len(sector_read)+1)))
+                    user_stock_choice = psf.get_int_positive("\n\n|-> Which stock to add: ", list_range=list(range(1, len(sector_data) + 1)))
                     
-                    chosen_value_col1 = sector_read.iloc[user_stock_choice-1, 0]  
-                    chosen_value_col2 = sector_read.iloc[user_stock_choice-1, 1]  
+                    chosen_value_symbol = sector_data.iloc[user_stock_choice - 1, 0]  
+                    chosen_value_company = sector_data.iloc[user_stock_choice - 1, 1]  
                     
-                    tickers_dict["Symbol"].append(chosen_value_col1)
-                    tickers_dict["Company_name"].append(chosen_value_col2)  
-                    print(f"ticker dict : {tickers_dict}")
-                    chosen_sectors_dict = psf.replace_missing_ticker(chosen_sectors_dict, file_input, chosen_value_col1)
-                    return collect_Data(index, tickers_dict, path_Data_base, files, weights, num_elements, sectors_dict, chosen_sectors_dict)
+                    tickers_dict["Symbol"].append(chosen_value_symbol)
+                    tickers_dict["Company_name"].append(chosen_value_company)  
+                    print(f"Ticker dictionary (after appending chosen stock): {tickers_dict}")
+                    chosen_sectors_dict = psf.replace_missing_ticker(chosen_sectors_dict, file_input, chosen_value_symbol)
                     
-
-            #Append files[] with the file input
+                    # Retry with updated data
+                    return collect_data(index, tickers_dict, data_base_path, files, weights, num_elements, sectors_dict, chosen_sectors_dict)
+            
+            # Append file to files list
             files.append(file_input)
 
-            #read file input
+            # Read the file
             df_file_read = psf.read_file(file_path)
 
+            # Get valid weight
             weight = psf.get_valid_weight(file_input, weights, num_elements, index)
             weights.append(weight)
 
             print(files)
             print(file_input)
             
-            return (files,file_input,df_file_read, weights)
+            return files, file_input, df_file_read, weights
         
-        #Cheking reading Errors
+        # Checking for reading errors
         except (FileNotFoundError, PermissionError):
             print(f"Error reading file: {file_path}. Please ensure the file exists and is accessible.")
             continue
 
-        #Cheking Empty Errors
+        # Checking for empty file errors
         except errors.EmptyDataError:
             print(f"Empty data: {file_path}. The file is empty.")
             continue
 
-        #Cheking Parsing Errors
+        # Checking for parsing errors
         except errors.ParserError:
             print(f"Parsing error: {file_path}. The file content is not properly formatted.")
             continue
-        
-def clean_Data(closing: dict,
-               file_input:str,
-                   index: int,
-                     df_file_read: DataFrame)-> DataFrame:
 
+        
+def clean_data(closing: dict, file_input: str, index: int, df_file_read: DataFrame) -> DataFrame:
     
-    #set 'Date'coloum in the first data frame as Index, if it fails, try it with next Data.F
+    # Set 'Date' column in the first DataFrame as index; if it fails, try with the next DataFrame.
     if not psf.set_date(closing, df_file_read, index):
         return
-    else :
+    else:
         closing = psf.set_date(closing, df_file_read, index)
 
-    #formating 'Adj Close' as numeric value
+    # Format 'Adj Close' as a numeric value
     closing_df = psf.set_closing_prices(closing, df_file_read, file_input)
 
     return closing_df
 
-def analyse_Data(closing_df0 : DataFrame,
-                  weights: list, chosen_sectors_dict : dict)->Tuple[DataFrame, DataFrame, DataFrame, DataFrame]:
 
-    #Dropping NaN
-    closing_df01 = psf.prepare_closing_df(closing_df0)
+def analyze_data(closing_df0: DataFrame, weights: list, chosen_sectors_dict: dict) -> Tuple[DataFrame, DataFrame, DataFrame, DataFrame]:
+
+    # Drop NaN values
+    closing_df_cleaned = psf.prepare_closing_df(closing_df0)
     
-    #calculate daily return
-    df_dict, closing_df02  = ff.calculate_daily_returns(closing_df01) 
+    # Calculate daily returns
+    daily_return_dict, closing_df_returns = ff.calculate_daily_returns(closing_df_cleaned) 
 
-    #calculate daily return of market
-    portfolio_sector, df_sector_DL, df_sector_DL0 = ff.market_DR(chosen_sectors_dict)
+    # Calculate daily return of market for each sector
+    portfolio_sector, df_sector_daily_return, df_sector_initial = ff.market_DR(chosen_sectors_dict)
 
-    #calculate beta :    
-    beta_results = ff.calculate_beta(df_sector_DL, closing_df02, chosen_sectors_dict)
+    # Calculate beta values
+    beta_results = ff.calculate_beta(df_sector_daily_return, closing_df_returns, chosen_sectors_dict)
     
-    medaf_return  = ff.medaf(portfolio_sector, beta_results, chosen_sectors_dict)
+    # Calculate expected returns based on CAPM (Medaf)
+    capm_return = ff.medaf(portfolio_sector, beta_results, chosen_sectors_dict)
     
-    #Calculate the risk of each stock
-    risk_dict =  ff.risk_stock (closing_df02)
+    # Calculate the risk (volatility) of each stock
+    risk_dict = ff.risk_stock(closing_df_returns)
 
-    #calculate Cumulative return for each stock
-    closing_df1, totals_Cu_Rre = ff.calculate_cumulative_returns(closing_df02)
+    # Calculate cumulative return for each stock
+    closing_df_cumulative, cumulative_totals = ff.calculate_cumulative_returns(closing_df_returns)
     
-    #calculate the Annulized return
-    number_ofDays = psf.days_number(closing_df1)
-    five_year_annualized = ff.annulized_return(totals_Cu_Rre,number_ofDays)
+    # Calculate the annualized return over a five-year period
+    num_days = psf.days_number(closing_df_cumulative)
+    five_year_annualized = ff.annulized_return(cumulative_totals, num_days)
 
-    #calculate Correlation between Stocks
-    df_correlation = ff.calculate_correlation(closing_df1)
-    print(f"0 : {totals_Cu_Rre}")    
-    print(f"1 : {df_dict}")
-    print(f"2 : {weights}")
-    print(f"3 : {risk_dict}")
-    print(f"4 : {five_year_annualized}")
-    print(f"5 : {beta_results}")
-    print(f"6 : {medaf_return}")
+    # Calculate the correlation between stocks
+    df_correlation = ff.calculate_correlation(closing_df_cumulative)
+    
+    # Print intermediate results for verification
+    print(f"Cumulative Totals: {cumulative_totals}")    
+    print(f"Daily Returns: {daily_return_dict}")
+    print(f"Weights: {weights}")
+    print(f"Risk (Volatility): {risk_dict}")
+    print(f"Five-Year Annualized Return: {five_year_annualized}")
+    print(f"Beta Results: {beta_results}")
+    print(f"CAPM Return: {capm_return}")
+    
+    # Calculate portfolio return summary
+    df_portfolio = ff.recap_portfolio(daily_return_dict, weights, risk_dict, five_year_annualized, beta_results, capm_return)
 
-    #calculate Portofolio return
-    df_portfolio = ff.recap_portfolio(df_dict, weights, risk_dict, five_year_annualized, beta_results, medaf_return)
-
-    return (closing_df1, df_correlation, df_portfolio, df_sector_DL0)
+    return (closing_df_cumulative, df_correlation, df_portfolio, df_sector_initial)
 
 if __name__ == "__main__":
     main()

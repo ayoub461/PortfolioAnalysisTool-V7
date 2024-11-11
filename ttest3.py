@@ -3,7 +3,7 @@ from numpy import cov, var, nan
 from pandas import DataFrame, to_datetime, concat, Series
 from typing import Union, Tuple
 from datetime import datetime, timedelta
-from Support_funct import set_closing_prices
+from version5.support_functions import set_closing_prices
 
 
 def medaf(portfolio_sector : dict, beta_results : dict,

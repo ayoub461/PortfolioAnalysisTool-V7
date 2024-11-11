@@ -1,5 +1,5 @@
 import exercice3.version4.adapted_DD as dd
-import Support_funct as psf
+import version5.support_functions as psf
 import pandas as pd
 
 """Check and Display existing Tickers"""

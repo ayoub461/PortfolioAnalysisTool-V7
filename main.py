@@ -194,14 +194,6 @@ def analyze_data(closing_df0: DataFrame, weights: list, chosen_sectors_dict: dic
     # Calculate the correlation between stocks
     df_correlation = ff.calculate_correlation(closing_df_cumulative)
     
-    # Print intermediate results for verification
-    print(f"Cumulative Totals: {cumulative_totals}")    
-    print(f"Daily Returns: {daily_return_dict}")
-    print(f"Weights: {weights}")
-    print(f"Risk (Volatility): {risk_dict}")
-    print(f"Five-Year Annualized Return: {five_year_annualized}")
-    print(f"Beta Results: {beta_results}")
-    print(f"CAPM Return: {capm_return}")
     
     # Calculate portfolio return summary
     df_portfolio = ff.recap_portfolio(daily_return_dict, weights, risk_dict, five_year_annualized, beta_results, capm_return)
